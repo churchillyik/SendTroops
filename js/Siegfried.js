@@ -1,132 +1,203 @@
 ﻿// JScript File
 
+//--------------------------------
+// 工具函数
+//--------------------------------
 
-// Utility Functions
-function parseDecimal(str) {
-	var result = parseInt(str, 10);
+//	返回字符串string中从sStart字符开始的，长度为iCount的子字符串
+function startFromStr(string, sStart, iCount) 
+{
+	var iPos = string.indexOf(sStart);
+	if (iPos < 0)
+	{
+		return "";
+	}
+	return string.substr(iPos + sStart.length, iCount);
+}
+
+//	将字符串string从第一个出现sEnd字符的地方截断，返回左半部分的子字符串
+function endWithStr(string, sEnd) 
+{
+	var iPos = string.indexOf(sEnd);
+	if (iPos < 0)
+	{
+		return "";
+	}
+	return string.substr(0, iPos);
+}
+
+//	取得字符串string之中，从第一个出现字符start的地方到第一个出现字符end，最大长度为maxLength的子字符串
+function getStrBetween(string, start, end, maxLength) 
+{
+	if (maxLength == null)
+	{
+		//	默认返回的字符串长度为100
+		maxLength = 100;
+	}
 	
-	if ( isNaN(result) ) {
+	var result = startFromStr(string, start, maxLength + end.length);		//	截断左半部分
+	result = endWithStr(result, end);																		//	截断右半部分
+	return result;
+}
+
+//	把字符串解析为数字
+function parseDecimal(str) 
+{
+	var result = parseInt(str, 10);
+	if (isNaN(result)) 
+	{
 		postError("无法解析的数字:" + str);
 		return 0;
-	} else {
+	} 
+	else
+	{
 		return result;
 	}
 }
-function parseTime(str) {
-	//str is like "0:29:45"
+
+//	把字符串解析为时间(时间字符串格式为"xx:xx:xx")
+function parseTime(str) 
+{
 	var iHour = parseDecimal(endWithStr(str, ":"));
 	str = startFromStr(str, ":", 50);
 	var iMin  = parseDecimal(endWithStr(str, ":"));
 	str = startFromStr(str, ":", 50);
 	var iSec  = parseDecimal(str);
-	var result = ((iHour * 60) + iMin) * 60 + iSec;
 	
-	if ( isNaN(result) ) {
+	var result = ((iHour * 60) + iMin) * 60 + iSec;
+	if (isNaN(result)) 
+	{
 		postError("无法解析的时间:" + str);
 		return 0;
-	} else {
+	} 
+	else 
+	{
 		return result;
 	}
 }
-function getTimeStr(date) {
+
+//	把日期转化为字符串(时间字符串格式为"xx:xx:xx.xxx")
+function getTimeStr(date) 
+{
 	var timePos = date.toString().indexOf(":") - 2;
 	var str = date.toString().substr(timePos, 8);
 	var milliSec = date.getTime() % 1000;
-	if (milliSec > 0) {
-		var milliStr = "00"+milliSec;
-		milliStr = milliStr.substr(milliStr.length-3, 3);
-		str += "."+milliStr;
+	if (milliSec > 0) 
+	{
+		var milliStr = "00" + milliSec;
+		milliStr = milliStr.substr(milliStr.length - 3, 3);
+		str += "." + milliStr;
 	}
 	
 	return str;
 }
-function getNowTimestamp() {
-	var now = new Date();
-	var hour = "0"+now.getHours();
-	hour = hour.substr(hour.length-2, 2);
-	var min  = "0"+now.getMinutes();
-	min  = min.substr(min.length-2, 2);
-	var sec  = "0"+now.getSeconds();
-	sec  = sec.substr(sec.length-2, 2);
-	return now.getFullYear() +"-"+ (now.getMonth()+1) +"-"+ now.getDate() +" "+ hour +":"+ min +":"+ sec;
-	//return new Date().toLocaleString();
+
+//	获得当前日期的字符串(日期字符串格式为"xxxx-xx-xx xx:xx:xx")
+function getNowTimestamp() 
+{
+	var now 	= new Date();
+	var hour 	= "0" + now.getHours();
+	var min 	= "0" + now.getMinutes();
+	var sec  	= "0" + now.getSeconds();
+	
+	hour 	= hour.substr(hour.length - 2, 2);
+	min 	= min.substr(min.length - 2, 2);
+	sec 	= sec.substr(sec.length - 2, 2);
+	
+	var timestamp = now.getFullYear() 
+	+ "-" + (now.getMonth() + 1) 
+	+ "-" + now.getDate() 
+	+ " " + hour 
+	+ ":" + min 
+	+ ":" + sec;
+	return timestamp;
 }
 
-function getCoordinate(string) {
+//	把字符串解析为坐标(坐标字符串格式为"xxx|xxx")
+function getCoordinate(string) 
+{
 	var coord = new Object();
 	var iPos = string.indexOf("|");
-	if (iPos > 0) {
-		coord.x = string.substr( 0, iPos );
-		coord.y = string.substr( iPos+1, string.length-(iPos+1) );
+	if (iPos > 0) 
+	{
+		coord.x = string.substr(0, iPos);
+		coord.y = string.substr(iPos + 1, string.length - (iPos + 1));
 	}
-	if ( isNaN(coord.x) || isNaN(coord.y) )
+	
+	if (isNaN(coord.x) || isNaN(coord.y))
+	{
 		postError("无法解析的坐标:" + string);
+	}
+		
 	return coord;
 }
 
-function getHtmlParam(sParamName) {
+function getHtmlParam(sParamName) 
+{
 	var sParams = startFromStr(location.href, "?", 2000) + "&";
-	return getStrBetween(sParams, sParamName+"=", "&", 1000);
+	return getStrBetween(sParams, sParamName + "=", "&", 1000);
 }
 
-function startFromStr(string, sStart, iCount) {
-	var iPos = string.indexOf(sStart);
-	if (iPos < 0)
-		return "";
-	return string.substr(iPos+sStart.length, iCount);
-}
-function endWithStr(string, sEnd) {
-	var iPos = string.indexOf(sEnd);
-	if (iPos < 0)
-		return "";
-	return string.substr(0, iPos);
-}
-function getStrBetween(string, start, end, maxLength) {
-	if (maxLength == null)
-		maxLength = 100;//default result string max length
-	var result = startFromStr(string, start, maxLength+end.length);
-	result = endWithStr(result, end);
-	return result;
-}
-
-function getClassName(obj) {
+function getClassName(obj) 
+{
 	var className = "";
 	if (obj && obj.constructor)
-		className = getStrBetween(obj.constructor.toString(), "function ", "(", null);//等效于 getFunctionName(obj.constructor)
+	{
+		//等效于 getFunctionName(obj.constructor)
+		className = getStrBetween(obj.constructor.toString(), "function ", "(", null);
+	}
 	return className;
 }
-function getFunctionName(func) {
+
+function getFunctionName(func) 
+{
 	var funcName = "";
 	if (func && func instanceof Function)
+	{
 		funcName = getStrBetween(func.toString(), "function ", "(", null);
+	}
 	return funcName;
 }
 
-function getResourceImg(type) {
-	return "<img border=0 src='http://"+g_sServerURL+"/img/un/r/"+(type+1)+".gif' />";
+function getResourceImg(type) 
+{
+	var string = "<img border=0 src='http://" 
+	+ g_sServerURL 
+	+ "/img/un/r/" 
+	+ (type + 1) 
+	+ ".gif' />";
+	return string;
 }
 
 var g_sMessage = "";
-function postMessage(msg) {
-	g_sMessage += getNowTimestamp() +": "+ msg +"<br/>\r\n";
+function postMessage(msg) 
+{
+	g_sMessage += getNowTimestamp() + ": " + msg + "<br/>\r\n";
 	if (g_sMessage.length > 5000)
+	{
 		g_sMessage = startFromStr(g_sMessage, "\r\n", 6000);
+	}
 	document.getElementById('message').innerHTML = g_sMessage;
 }
-function clearMessage() {
+
+function clearMessage() 
+{
 	g_sMessage = "";
 	document.getElementById('message').innerHTML = g_sMessage;
 }
-function postDebug(msg, callerObj) {
+
+function postDebug(msg, callerObj) 
+{
 	if (!g_isDebug)
 		return;
 	
 	var className = getClassName(callerObj);
-	postMessage("[Debug]{"+ className +"}"+ msg);
+	postMessage("[Debug]{" + className + "}" + msg);
 }
-function postError(msg) {
+
+function postError(msg) 
+{
 	postMessage("[Error] "+msg);
-	//stopBot();
 }
 
 

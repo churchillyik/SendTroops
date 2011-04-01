@@ -1,7 +1,7 @@
-﻿﻿<html xmlns="http://www.w3.org/1999/xhtml">
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>齐民要术 AttackTimer - by DS齐格飞</title>
+	<title>tool for sending troops</title>
 	<script type="text/javascript" language="JavaScript" src="js/Siegfried.js"></script>
 	<script type="text/javascript" language="JavaScript" src="js/actions.js"></script>
 	<link rel="stylesheet" type="text/css" href="img/unx.css" />
@@ -13,99 +13,105 @@ var RETRY_SEC = 5;
 var REFRESH_MIN = 10;
 var g_refreshTimeout;
 
-//For debug usage Only				true or false
+//	For debug usage Only				true or false
 var g_isDebug;
 if (getHtmlParam("debug").length > 0)
 	g_isDebug   = eval('(' + getHtmlParam("debug") + ')');
 if (g_isDebug != true)
-	g_isDebug = false;//default
+	g_isDebug = false;	//default
 
 var g_sServerURL  = null;
 var g_currentUser = {name:null,pass:null};
 if (getHtmlParam("user").length > 0)
 	g_currentUser = eval('(' + getHtmlParam("user") + ')');
 
-var g_taskList = new Array();//[]
+var g_taskList = new Array();
 
-function xstartBot() {
-
+//	佯攻
+function xstartBot() 
+{
   var x_target = document.getElementById('xfaketarget').value;
   var x_targetlist = x_target.split("\n"); 
   var x_troop = document.getElementById('xtroop').value;
   var x_count = document.getElementById('xcount').value;
 
-  var i=0;
-  for (i=0;i<=x_targetlist.length;i++){
+  var i = 0;
+  for (i = 0; i <= x_targetlist.length; i++)
+  {
+    var j = 0;
+    for (j = 0; j < x_count; j++)
+    {
+			postMessage("新任务准备");
+			g_sServerURL = document.getElementById('serverURL').value;
+			if (document.getElementById('username').value.length > 0)
+			{
+				g_currentUser.name = document.getElementById('username').value;
+			}
+			if (document.getElementById('userpass').value.length > 0)
+			{
+				g_currentUser.pass = document.getElementById('userpass').value;
+			}
+			if (g_currentUser.name == null) 
+			{
+				postMessage("未输入用户信息");
+			}
 
-    var j=0;
-    for (j=0;j<x_count;j++){
+			var villageId = document.getElementById('xvillageId').value;
+			var target    = x_targetlist[i];
+			var time      = document.getElementById('xtime').value;
+			time = time.substr(0, time.length - 1) + (time.substr(time.length - 1, 1) * 1 + j);
+
+			var type      = parseDecimal(3);
+			var catapult1 = "4";
+			var catapult2 = "4";
+			if (target.indexOf(" ") >= 0) 
+			{
+				postError("目标坐标" + target + "格式有误，不能有空格");
+				return;
+			}
+			if (time.length != 10) 
+			{
+				postError("到达时间" + time + " 格式有误，应为00:00:00.0");
+				return;
+			}
 	
-	postMessage("新任务准备");
+			var troopArray 	= [0,0,0,0,0,0,0,0,0,0,0];
+			var troops 			= new Object();
+			if (x_troop == "3")
+			{
+        troops["t8"] 	= 1;
+				troopArray[7] = 1;
+			}
+			else if (x_troop == "4")
+			{
+        troops["t7"] = 1;
+				troopArray[6] = 1;
+			}
 
-	g_sServerURL = document.getElementById('serverURL').value;
-	if (document.getElementById('username').value.length > 0)
-		g_currentUser.name = document.getElementById('username').value;
-	if (document.getElementById('userpass').value.length > 0)
-		g_currentUser.pass = document.getElementById('userpass').value;
-	if (g_currentUser.name == null) {
-		postMessage("未输入用户信息");
-	}
-
-	var villageId = document.getElementById('xvillageId').value;
-	var target    = x_targetlist[i];
-	var time      = document.getElementById('xtime').value;
-	time = time.substr(0,time.length-1) + (time.substr(time.length-1,1)*1+j);
-
-	var type      = parseDecimal(3);
-	var catapult1 = "4";
-	var catapult2 = "4";
-	if (target.indexOf(" ") >= 0) {
-		postError("目标坐标"+ target +"格式有误，不能有空格");
-		return;
-	}
-	if (time.length != 10) {
-		postError("到达时间"+time+" 格式有误，应为00:00:00.0");
-		return;
-	}
-	
-	var troopArray = [0,0,0,0,0,0,0,0,0,0,0];
-	var troops = new Object();
-	if (x_troop == "3")
-	{
-        	troops["t8"] = 1;
-		troopArray[7] = 1;
-	}
-	else if(x_troop == "4")
-	{
-        	troops["t7"] = 1;
-		troopArray[6] = 1;
-	}
-
-	
-	var action = new AttackTimer(villageId, target, troops, type, time, catapult1, catapult2);
-	action.troopArray = troopArray;
-	g_taskList.push(action);//Add this attack task into list
-	printStatus();
-	action.run(null, attackResult);
-
-
-
-
+			var action = new AttackTimer(villageId, target, troops, type, time, catapult1, catapult2);
+			action.troopArray = troopArray;
+			g_taskList.push(action);	//Add this attack task into list
+			printStatus();
+			action.run(null, attackResult);
     }
-
   }
-
 }
 
-function startBot() {
+//	真攻
+function startBot() 
+{
 	postMessage("新任务准备");
-
 	g_sServerURL = document.getElementById('serverURL').value;
 	if (document.getElementById('username').value.length > 0)
+	{
 		g_currentUser.name = document.getElementById('username').value;
+	}
 	if (document.getElementById('userpass').value.length > 0)
+	{
 		g_currentUser.pass = document.getElementById('userpass').value;
-	if (g_currentUser.name == null) {
+	}
+	if (g_currentUser.name == null) 
+	{
 		postMessage("未输入用户信息");
 	}
 
@@ -115,56 +121,83 @@ function startBot() {
 	var type      = parseDecimal(document.getElementById('type').value);
 	var catapult1 = document.getElementById('kata').value;
 	var catapult2 = document.getElementById('kata2').value;
-	if (target.indexOf(" ") >= 0) {
+	if (target.indexOf(" ") >= 0) 
+	{
 		postError("目标坐标 格式有误，不能有空格");
 		return;
 	}
-	if (time.length != 10) {
+	if (time.length != 10) 
+	{
 		postError("到达时间 格式有误，应为00:00:00.0");
 		return;
 	}
 	
-	var troopArray = [0,0,0,0,0,0,0,0,0,0,0];
-	var troops = new Object();
-	for (var i=0; i<11; i++) {
-		var tId = "t"+(i+1);
+	var troopArray 	= [0,0,0,0,0,0,0,0,0,0,0];
+	var troops 			= new Object();
+	for (var i = 0; i < 11; i++) 
+	{
+		var tId = "t" + (i + 1);
 		var tNumber = document.getElementById(tId).value;
-		if ( tNumber!= "" && !isNaN(tNumber) ) {
+		if (tNumber != "" && !isNaN(tNumber)) 
+		{
 			troopArray[i] = tNumber;
-			troops[tId] = tNumber;
+			troops[tId] 	= tNumber;
 		}
 	}
 	
 	var action = new AttackTimer(villageId, target, troops, type, time, catapult1, catapult2);
 	action.troopArray = troopArray;
-	g_taskList.push(action);//Add this attack task into list
-	printStatus();
-	action.run(null, attackResult);
+	g_taskList.push(action);					//	添加定时任务到队列
+	printStatus();										//	打印出兵信息表格
+	action.run(null, attackResult);		//	执行出兵任务
 }
-function attackResult(action) {
+
+//	打印发兵结果
+function attackResult(action) 
+{
 	printStatus();
 }
-function printStatus() {
-	var sStatus = "<table cellspacing='1' class='tbg'><tr><th>出兵村庄</th><th>目标坐标</th><th>到达时间</th><th>军队数量</th><th>方式</th><th>任务状态</th></tr>\r\n";
-	for (var i=0; i<g_taskList.length; i++) {
+
+function printStatus() 
+{
+	var sStatus = "<table cellspacing='1' class='tbg'><tr>" 
+	+ "<th>出兵村庄</th>" 
+	+ "<th>目标坐标</th>" 
+	+ "<th>到达时间</th>" 
+	+ "<th>军队数量</th>" 
+	+ "<th>方式</th>" 
+	+ "<th>任务状态</th></tr>\r\n";
+	
+	for (var i = 0; i < g_taskList.length; i++) 
+	{
 		var action = g_taskList[i];
 		
-		sStatus += "<tr><td>"+action.villageId+"</td><td>"+action.target+"</td><td>"+action.time+"</td><td>"+action.troopArray+"</td><td>";
+		sStatus += "<tr><td>" 
+		+ action.villageId 
+		+ "</td><td>" 
+		+ action.target 
+		+ "</td><td>" 
+		+ action.time 
+		+ "</td><td>" 
+		+ action.troopArray 
+		+ "</td><td>";
 		
-		switch (action.type) {
+		switch (action.type) 
+		{
 		  case 2:
-			sStatus += "增援";
-			break;
+				sStatus += "增援";
+				break;
 		  case 3:
-			sStatus += "攻击:普通/侦察";
-			break;
+				sStatus += "攻击:普通/侦察";
+				break;
 		  case 4:
-			sStatus += "攻击:抢夺";
-			break;
+				sStatus += "攻击:抢夺";
+				break;
 		} 
 		sStatus += "</td><td>";
 		
-		switch (action.status) {
+		switch (action.status) 
+		{
 		  case SUCCESS:
 			sStatus += "成功出发";
 			break;
@@ -175,27 +208,28 @@ function printStatus() {
 		} 
 		sStatus += "</td></tr>\r\n";
 	}
+	
 	sStatus += "</table><br/>\r\n";
-
-	sStatus += "状态更新于 - "+ getNowTimestamp() +"<br/>\r\n";
+	sStatus += "状态更新于 - " + getNowTimestamp() + "<br/>\r\n";
 	document.getElementById('status').innerHTML = sStatus;
 }
+
 </script>
 
 <div>
 <table border="0" width="100%">
   <tr>
     <td>
-      服务器:<input id="serverURL" type="text" value="s1.travian.cn" /><br />
+      服务器:<input id="serverURL" type="text" value="ts9.travian.com" /><br />
       <br />
 	
-      用户名:<input id="username" type="text" value="" /><br />
-      密码　:<input id="userpass" type="password" value="" /><br />
+      用户名:<input id="username" type="text" value="manhandle" /><br />
+      密码　:<input id="userpass" type="password" value="831028" /><br />
       <br />
 	
       <b>定时攻击任务:</b><br />
-      出兵村庄ID:<input id="villageId" type="text" value="" size="6" />
-      目标坐标:<input id="target" type="text" value="-10|-10" size="12" />
+      出兵村庄ID:<input id="villageId" type="text" value="47216" size="6" />
+      目标坐标:<input id="target" type="text" value="188|65" size="12" />
       到达时间:<input id="time" type="text" value="02:30:00.1" size="12" />
       <br />
       <br />
@@ -203,180 +237,231 @@ function printStatus() {
     <td>
       <table border="1">
         <tr valign="top">
-    	<td>
-      	佯攻目标：<br />
-      	<textarea id="xfaketarget" rows="5">
-100|100
-101|101
-102|102</textarea><br />
-    	</td>
-    	<td>
-	  <table>
-	    <tr>
-	      <td>出兵村ID:</td>
-	      <td><input id="xvillageId" type="text" value="" size="12" /></td>
-	    </tr>
-	    <tr>
-	      <td>到达时间:</td>
-	      <td><input id="xtime" type="text" value="02:30:00.1" size="12" /></td>
-	    </tr>
-	    <tr>
-	      <td>兵种：</td>
-	      <td><select id="xtroop"><option value="3">1投石</option><option value="4">1冲车</option></select></td>
-	    </tr>
-
-	    <tr>
-	      <td>波数:</td>
-	      <td><input id="xcount" type="text" size="6" value="1"/></td>
-	    </tr>
-	    <tr>
-	      <td colspan="2"><input type="button" value="加入佯攻" onclick="xstartBot()" />
-		</td>
-	    </tr>
-	  </table>
-    	</td>
-        </tr>
-      </table>
+		    	<td>
+		      	佯攻目标：<br />
+		      	<textarea id="xfaketarget" rows="5">
+184|62
+188|65
+180|64
+						</textarea><br />
+		    	</td>
+		    	<td>
+				  	<table>
+				    	<tr>
+				      	<td>出兵村ID:</td>
+								<td><input id="xvillageId" type="text" value="47216" size="12" /></td>
+				    	</tr>
+				    	<tr>
+				      	<td>到达时间:</td>
+				      	<td><input id="xtime" type="text" value="02:30:00.1" size="12" /></td>
+				    	</tr>
+				    	<tr>
+				      	<td>兵种：</td>
+				      	<td>
+				      		<select id="xtroop">
+				      			<option value="3">1投石</option>
+				      			<option value="4">1冲车</option>
+				      		</select>
+				      	</td>
+				    	</tr>
+				    	<tr>
+				      	<td>波数:</td>
+				      	<td><input id="xcount" type="text" size="6" value="1"/></td>
+				    	</tr>
+							<tr>
+								<td colspan="2">
+									<input type="button" value="加入佯攻" onclick="xstartBot()" />
+								</td>
+				    	</tr>
+				  	</table>
+		    	</td>
+				</tr>
+			</table>
     </td>
-
   </tr>
 </table>
 
-
 <table cellspacing="1" cellpadding="2" class="tbg">
 <tr class="unit">
-<td>&nbsp;</td><td><img src="img/un/u/1.gif" title="古罗马步兵"></td><td><img src="img/un/u/2.gif" title="禁卫兵"></td><td><img src="img/un/u/3.gif" title="帝国兵"></td><td><img src="img/un/u/4.gif" title="使节骑士"></td><td><img src="img/un/u/5.gif" title="帝国骑士"></td><td><img src="img/un/u/6.gif" title="将军骑士"></td><td><img src="img/un/u/7.gif" title="冲撞车"></td><td><img src="img/un/u/8.gif" title="火焰投石器"></td><td><img src="img/un/u/9.gif" title="参议员"></td><td><img src="img/un/u/10.gif" title="拓荒者"></td><td><img src="img/un/u/hero.gif" title="英雄"></td></tr>
+	<td>&nbsp;</td>
+	<td><img src="img/un/u/1.gif" title="古罗马步兵"></td>
+	<td><img src="img/un/u/2.gif" title="禁卫兵"></td>
+	<td><img src="img/un/u/3.gif" title="帝国兵"></td>
+	<td><img src="img/un/u/4.gif" title="使节骑士"></td>
+	<td><img src="img/un/u/5.gif" title="帝国骑士"></td>
+	<td><img src="img/un/u/6.gif" title="将军骑士"></td>
+	<td><img src="img/un/u/7.gif" title="冲撞车"></td>
+	<td><img src="img/un/u/8.gif" title="火焰投石器"></td>
+	<td><img src="img/un/u/9.gif" title="参议员"></td>
+	<td><img src="img/un/u/10.gif" title="拓荒者"></td>
+	<td><img src="img/un/u/hero.gif" title="英雄"></td>
+</tr>
 <tr class="unit">
-<td>&nbsp;</td><td><img src="img/un/u/11.gif" title="棍棒兵"></td><td><img src="img/un/u/12.gif" title="矛兵"></td><td><img src="img/un/u/13.gif" title="斧头兵"></td><td><img src="img/un/u/14.gif" title="侦察兵"></td><td><img src="img/un/u/15.gif" title="圣骑士"></td><td><img src="img/un/u/16.gif" title="日尔曼骑兵"></td><td><img src="img/un/u/17.gif" title="冲撞车"></td><td><img src="img/un/u/18.gif" title="投石器"></td><td><img src="img/un/u/19.gif" title="执政官"></td><td><img src="img/un/u/20.gif" title="拓荒者"></td><td><img src="img/un/u/hero.gif" title="英雄"></td></tr>
+	<td>&nbsp;</td>
+	<td><img src="img/un/u/11.gif" title="棍棒兵"></td>
+	<td><img src="img/un/u/12.gif" title="矛兵"></td>
+	<td><img src="img/un/u/13.gif" title="斧头兵"></td>
+	<td><img src="img/un/u/14.gif" title="侦察兵"></td>
+	<td><img src="img/un/u/15.gif" title="圣骑士"></td>
+	<td><img src="img/un/u/16.gif" title="日尔曼骑兵"></td>
+	<td><img src="img/un/u/17.gif" title="冲撞车"></td>
+	<td><img src="img/un/u/18.gif" title="投石器"></td>
+	<td><img src="img/un/u/19.gif" title="执政官"></td>
+	<td><img src="img/un/u/20.gif" title="拓荒者"></td>
+	<td><img src="img/un/u/hero.gif" title="英雄"></td>
+</tr>
 <tr class="unit">
-<td>&nbsp;</td><td><img src="img/un/u/21.gif" title="方阵兵"></td><td><img src="img/un/u/22.gif" title="剑士"></td><td><img src="img/un/u/23.gif" title="探路者"></td><td><img src="img/un/u/24.gif" title="雷法师"></td><td><img src="img/un/u/25.gif" title="德鲁伊骑兵"></td><td><img src="img/un/u/26.gif" title="海顿圣骑士"></td><td><img src="img/un/u/27.gif" title="冲撞车"></td><td><img src="img/un/u/28.gif" title="投石器"></td><td><img src="img/un/u/29.gif" title="首领"></td><td><img src="img/un/u/30.gif" title="拓荒者"></td><td><img src="img/un/u/hero.gif" title="英雄"></td></tr>
-<tr><td>军队数量</td><td><input id="t1" type="text" value="" size="2" /></td><td><input id="t2" type="text" value="" size="2" /></td><td><input id="t3" type="text" value="" size="2" /></td><td><input id="t4" type="text" value="" size="2" /></td><td><input id="t5" type="text" value="" size="2" /></td><td><input id="t6" type="text" value="" size="2" /></td><td><input id="t7" type="text" value="" size="2" /></td><td><input id="t8" type="text" value="" size="2" /></td><td><input id="t9" type="text" value="" size="2" /></td><td><input id="t10" type="text" value="" size="2" /></td><td><input id="t11" type="text" value="" size="2" /></td></tr>
+	<td>&nbsp;</td>
+	<td><img src="img/un/u/21.gif" title="方阵兵"></td>
+	<td><img src="img/un/u/22.gif" title="剑士"></td>
+	<td><img src="img/un/u/23.gif" title="探路者"></td>
+	<td><img src="img/un/u/24.gif" title="雷法师"></td>
+	<td><img src="img/un/u/25.gif" title="德鲁伊骑兵"></td>
+	<td><img src="img/un/u/26.gif" title="海顿圣骑士"></td>
+	<td><img src="img/un/u/27.gif" title="冲撞车"></td>
+	<td><img src="img/un/u/28.gif" title="投石器"></td>
+	<td><img src="img/un/u/29.gif" title="首领"></td>
+	<td><img src="img/un/u/30.gif" title="拓荒者"></td>
+	<td><img src="img/un/u/hero.gif" title="英雄"></td>
+</tr>
+<tr>
+	<td>军队数量</td>
+	<td><input id="t1" type="text" value="" size="2" /></td>
+	<td><input id="t2" type="text" value="" size="2" /></td>
+	<td><input id="t3" type="text" value="" size="2" /></td>
+	<td><input id="t4" type="text" value="" size="2" /></td>
+	<td><input id="t5" type="text" value="" size="2" /></td>
+	<td><input id="t6" type="text" value="" size="2" /></td>
+	<td><input id="t7" type="text" value="" size="2" /></td>
+	<td><input id="t8" type="text" value="" size="2" /></td>
+	<td><input id="t9" type="text" value="" size="2" /></td>
+	<td><input id="t10" type="text" value="" size="2" /></td>
+	<td><input id="t11" type="text" value="1" size="2" /></td>
+</tr>
 </table>
 
-	<br />
-	方式 <select id="type" size="" class="f10">
-		<option value="2">增援</option>
-		<option value="3">攻击:普通/侦察</option>
-		<option value="4">攻击:抢夺</option>
-	</select>
-	<br />
-	<br />
+<br />
+方式 
+<select id="type" size="" class="f10">
+	<option value="2">增援</option>
+	<option value="3">攻击:普通/侦察</option>
+	<option value="4">攻击:抢夺</option>
+</select>
+<br />
 
-目标 <select id="kata"  name="kata"  size="" class="f10"> <option value="99">随机目标</option>
- <optgroup label="资源">
-  <option value="1">伐木场</option>
-
-  <option value="2">黏土矿</option>
-  <option value="3">铁矿场</option>
-  <option value="4">农场</option>
-  <option value="5">木材厂</option>
-  <option value="6">砖块厂</option>
-  <option value="7">铸造厂</option>
-
-  <option value="8">磨坊</option>
-  <option value="9">面包房</option>
- </optgroup>
- <optgroup label="基础">
-  <option value="10">仓库</option>
-  <option value="11">粮仓</option>
-  <option value="15">中心大楼</option>
-
-  <option value="17">市场</option>
-  <option value="18">大使馆</option>
-  <option value="24">市政厅</option>
-  <option value="25">行宫</option>
-  <option value="26">皇宫</option>
-  <option value="27">宝库</option>
-
-  <option value="28">交易所</option>
-  <option value="38">大仓库</option>
-  <option value="39">大粮仓</option>
- </optgroup>
- <optgroup label="军事">
-  <option value="12">铁匠铺</option>
-  <option value="13">军械库</option>
-
-  <option value="14">竞技场</option>
-  <option value="16">集结点</option>
-  <option value="19">兵营</option>
-  <option value="20">马厩</option>
-  <option value="21">工场</option>
-  <option value="22">研发所</option>
-
-  <option value="29">大兵营</option>
-  <option value="30">大马厩</option>
-  <option value="37">英雄园</option>
- </optgroup>
-</select> <span class="f8">(准备以投石车攻击)</span>
-	<br />
-目标 <select id="kata2" name="kata2" size="" class="f10"> <option value="99">随机目标</option>
- <optgroup label="资源">
-  <option value="1">伐木场</option>
-
-  <option value="2">黏土矿</option>
-  <option value="3">铁矿场</option>
-  <option value="4">农场</option>
-  <option value="5">木材厂</option>
-  <option value="6">砖块厂</option>
-  <option value="7">铸造厂</option>
-
-  <option value="8">磨坊</option>
-  <option value="9">面包房</option>
- </optgroup>
- <optgroup label="基础">
-  <option value="10">仓库</option>
-  <option value="11">粮仓</option>
-  <option value="15">中心大楼</option>
-
-  <option value="17">市场</option>
-  <option value="18">大使馆</option>
-  <option value="24">市政厅</option>
-  <option value="25">行宫</option>
-  <option value="26">皇宫</option>
-  <option value="27">宝库</option>
-
-  <option value="28">交易所</option>
-  <option value="38">大仓库</option>
-  <option value="39">大粮仓</option>
+<br />
+目标 
+<select id="kata"  name="kata"  size="" class="f10"> 
+	<option value="99">随机目标</option>
+	<optgroup label="资源">
+	  <option value="1">伐木场</option>
+	  <option value="2">黏土矿</option>
+	  <option value="3">铁矿场</option>
+	  <option value="4">农场</option>
+	  <option value="5">木材厂</option>
+	  <option value="6">砖块厂</option>
+	  <option value="7">铸造厂</option>
+	  <option value="8">磨坊</option>
+	  <option value="9">面包房</option>
+ 	</optgroup>
+	<optgroup label="基础">
+  	<option value="10">仓库</option>
+  	<option value="11">粮仓</option>
+  	<option value="15">中心大楼</option>
+	  <option value="17">市场</option>
+	  <option value="18">大使馆</option>
+	  <option value="24">市政厅</option>
+	  <option value="25">行宫</option>
+	  <option value="26">皇宫</option>
+	  <option value="27">宝库</option>
+	  <option value="28">交易所</option>
+	  <option value="38">大仓库</option>
+	  <option value="39">大粮仓</option>
  </optgroup>
  <optgroup label="军事">
-  <option value="12">铁匠铺</option>
-  <option value="13">军械库</option>
-
-  <option value="14">竞技场</option>
-  <option value="16">集结点</option>
-  <option value="19">兵营</option>
-  <option value="20">马厩</option>
-  <option value="21">工场</option>
-  <option value="22">研发所</option>
-
-  <option value="29">大兵营</option>
-  <option value="30">大马厩</option>
-  <option value="37">英雄园</option>
+	  <option value="12">铁匠铺</option>
+	  <option value="13">军械库</option>
+	  <option value="14">竞技场</option>
+	  <option value="16">集结点</option>
+	  <option value="19">兵营</option>
+	  <option value="20">马厩</option>
+	  <option value="21">工场</option>
+	  <option value="22">研发所</option>
+	  <option value="29">大兵营</option>
+	  <option value="30">大马厩</option>
+	  <option value="37">英雄园</option>
  </optgroup>
-</select> <span class="f8">(准备以投石车攻击)</span>
+</select> 
+<span class="f8">(准备以投石车攻击)</span>
 
-	<br />
-	<br />
+<br />
+目标 
+<select id="kata2" name="kata2" size="" class="f10"> 
+	<option value="99">随机目标</option>
+	<optgroup label="资源">
+	  <option value="1">伐木场</option>
+	  <option value="2">黏土矿</option>
+	  <option value="3">铁矿场</option>
+	  <option value="4">农场</option>
+	  <option value="5">木材厂</option>
+	  <option value="6">砖块厂</option>
+	  <option value="7">铸造厂</option>
+	  <option value="8">磨坊</option>
+	  <option value="9">面包房</option>
+	</optgroup>
+	<optgroup label="基础">
+	  <option value="10">仓库</option>
+	  <option value="11">粮仓</option>
+	  <option value="15">中心大楼</option>
+	  <option value="17">市场</option>
+	  <option value="18">大使馆</option>
+	  <option value="24">市政厅</option>
+	  <option value="25">行宫</option>
+	  <option value="26">皇宫</option>
+	  <option value="27">宝库</option>
+	  <option value="28">交易所</option>
+	  <option value="38">大仓库</option>
+	  <option value="39">大粮仓</option>
+	</optgroup>
+	<optgroup label="军事">
+	  <option value="12">铁匠铺</option>
+	  <option value="13">军械库</option>
+	  <option value="14">竞技场</option>
+	  <option value="16">集结点</option>
+	  <option value="19">兵营</option>
+	  <option value="20">马厩</option>
+	  <option value="21">工场</option>
+	  <option value="22">研发所</option>
+	  <option value="29">大兵营</option>
+	  <option value="30">大马厩</option>
+	  <option value="37">英雄园</option>
+	</optgroup>
+</select> 
+<span class="f8">(准备以投石车攻击)</span>
+
+<br />
+<br />
 <!--倒计时启动时间:<input id="txtEVAL_IN_ADVANCE" type="text" size="6" value="120" enable="false"/>-->
-	<br />
-	<br />
+<br />
+<br />
 
-	<input type="button" value="加入任务" onclick="startBot();" /> * 可以在等待队列中加入多个任务，它们会分别定时执行
-	<br />
+<input type="button" value="加入任务" onclick="startBot();" />
+ * 可以在等待队列中加入多个任务，它们会分别定时执行
+<br />
 
-	<br />
+<br />
+当前状态:
+<br />
+<div id="status"></div>
 
-	当前状态:<br />
-	<div id="status"></div>
+<br />
+<input type="button" value="清空消息" onclick="clearMessage();" />
 
-	<br />
-
-	<input type="button" value="清空消息" onclick="clearMessage();" />
-	<br />
-	消息:<br />
-	<div id="message"></div>
-	<br />
+<br />
+消息:
+<br />
+<div id="message"></div>
+<br />
 </div>
 
 </body>
