@@ -132,12 +132,14 @@ function getCoordinate(string)
 	return coord;
 }
 
+//	取得location.href中字符"?"之后，"="之后的部分
 function getHtmlParam(sParamName) 
 {
 	var sParams = startFromStr(location.href, "?", 2000) + "&";
 	return getStrBetween(sParams, sParamName + "=", "&", 1000);
 }
 
+//	取得类的名称
 function getClassName(obj) 
 {
 	var className = "";
@@ -149,6 +151,7 @@ function getClassName(obj)
 	return className;
 }
 
+//	取得函数的名称
 function getFunctionName(func) 
 {
 	var funcName = "";
@@ -159,6 +162,7 @@ function getFunctionName(func)
 	return funcName;
 }
 
+//	取得资源图片名
 function getResourceImg(type) 
 {
 	var string = "<img border=0 src='http://" 
@@ -169,10 +173,12 @@ function getResourceImg(type)
 	return string;
 }
 
+//	显示流水消息
 var g_sMessage = "";
 function postMessage(msg) 
 {
 	g_sMessage += getNowTimestamp() + ": " + msg + "<br/>\r\n";
+	//	g_sMessage超过5000个字符的话，就顶掉最上面的一行
 	if (g_sMessage.length > 5000)
 	{
 		g_sMessage = startFromStr(g_sMessage, "\r\n", 6000);
@@ -180,12 +186,14 @@ function postMessage(msg)
 	document.getElementById('message').innerHTML = g_sMessage;
 }
 
+//	清空流水消息
 function clearMessage() 
 {
 	g_sMessage = "";
 	document.getElementById('message').innerHTML = g_sMessage;
 }
 
+//	打印与某个对象相关的流水消息
 function postDebug(msg, callerObj) 
 {
 	if (!g_isDebug)
@@ -195,6 +203,7 @@ function postDebug(msg, callerObj)
 	postMessage("[Debug]{" + className + "}" + msg);
 }
 
+//	打印错误消息
 function postError(msg) 
 {
 	postMessage("[Error] "+msg);
@@ -208,52 +217,67 @@ function postError(msg)
 // @author Rick Sun
 //
 // Usage:
-//	function ClassB() {
+//	function ClassB() 
+//	{
 //		this.Super = ClassA;
 //		this.Super(); //Call Super Constructor first
 //		//Constructor, put Member Variables here.
 //	}
-//	Class.Extends(ClassB, ClassA, {
+//	Class.Extends(ClassB, ClassA,
+//	{
 //		//Prototype, put Member Functions here.
 //		member1:function(){……},
 //		member1:function(){……}
 //	});
 //
 //////////////////////////////////////////////////////////////////
-var Class = {
-	Extends:		function(subClass, superClass, protoType) {
-		if (superClass) {
+var Class = 
+{
+	Extends: function(subClass, superClass, protoType) 
+	{
+		if (superClass) 
+		{
 			Class.ExtendProto(subClass.prototype, superClass.prototype);
 		}
 		Class.ExtendProto(subClass.prototype, protoType);
 	},
-	ExtendProto:	function(destination, source) {
-		for (property in source) {
+	
+	ExtendProto: function(destination, source) 
+	{
+		for (property in source) 
+		{
 			destination[property] = source[property];
 		}
 	}
 }
-Function.prototype.Extends = function(superClass, protoType) {
+
+Function.prototype.Extends = function(superClass, protoType) 
+{
 	Class.Extends(this, superClass, protoType);
 }
 ///////////////////////////// END of Class Extension /////////////////////////////
 
 
 // Timer Class
-function Timer(obj, func, args) {
+// 定时器
+function Timer(obj, func, args) 
+{
 	if (args == null)
 		args = [];
-	function execute() {
+	function execute() 
+	{
 		func.apply(obj, args);
 	}
 
 	var timeout;
-	this.setTimer = function(millisec) {
+	this.setTimer = function(millisec) 
+	{
 		clearTimeout(timeout);
 		timeout = setTimeout(execute, millisec);
 		//postDebug("setTimeout "+ getClassName(obj) +"."+ getFunctionName(func) +" in "+ millisec +"ms", this);
 	}
-	this.clearTimer = function() {
+	this.clearTimer = function() 
+	{
 		clearTimeout(timeout);
 		//postDebug("clearTimeout "+ getClassName(obj) +"."+ getFunctionName(func) +" in "+ millisec +"ms", this);
 	}
@@ -261,25 +285,30 @@ function Timer(obj, func, args) {
 
 
 // PUBLIC class AjaxRequestText
+// Ajax请求
 function AjaxRequestText()
 {
 	// PRIVATE:
-	var callerObj    = null;
-	var callbackFunc = null;
-	var request = null;
+	var callerObj    = null;	//	回调函数的参数
+	var callbackFunc = null;	//	回调函数
+	var request = null;				//	Ajax请求
 
 	// PRIVATE: Get XML HTTP Request object
+	// 创建HTTP通讯对象
 	function getRequest()
 	{
 		var req = null;
 		// Mozilla and Internet Explorer 7
-		if (window.XMLHttpRequest) {
+		if (window.XMLHttpRequest) 
+		{
 			req = new XMLHttpRequest();
 		}
 		// Microsoft IE before 7
-		if (window.ActiveXObject) {
+		if (window.ActiveXObject) 
+		{
 			try { req = new ActiveXObject("Msxml2.XMLHTTP"); }
-			catch(e) {
+			catch(e) 
+			{
 				try { req = new ActiveXObject("Microsoft.XMLHTTP"); }
 				catch(e) { req = null; }
 			}
@@ -287,16 +316,18 @@ function AjaxRequestText()
 		return req;
 	}
 
-	// PRIVATE:
+	// PRIVATE:	回调函数
 	function callbackHandler()
 	{
-		if (request && request.readyState == 4 && callbackFunc) {
+		if (request && request.readyState == 4 && callbackFunc) 
+		{
 			var text = request.responseText;
 			callbackFunc.apply(callerObj, [text]);
 		}
 	}
 
 	// PUBLIC:
+	// HTTP POST操作（异步）
 	this.send = function(url, params, callerObject, callbackFunction)
 	{
 		callerObj    = callerObject;
@@ -304,16 +335,22 @@ function AjaxRequestText()
 		// Have to create new request for IE. 
 		// Mozilla could reuse the same request. 
 		request = getRequest();
-		if (request) {
-			if (window.netscape) {//Enable cross-domain request from local
-				try {
+		if (request) 
+		{
+			if (window.netscape) 
+			{
+				//Enable cross-domain request from local
+				try 
+				{
 					netscape.security.PrivilegeManager.enablePrivilege("UniversalBrowserRead");
-				} catch (e) {
+				} 
+				catch (e) 
+				{
 					alert("Permission UniversalBrowserRead denied.");
 				}
 			}
 			request.onreadystatechange = callbackHandler;
-			request.open("POST", url, true);
+			request.open("POST", url, true);	//	异步
 			request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 			request.send(params);
 		}
@@ -321,22 +358,32 @@ function AjaxRequestText()
 
 	var requestSync = null;
 	// PUBLIC:
-	this.sendSync = function(url, params) {
+	// HTTP POST操作（同步）
+	this.sendSync = function(url, params) 
+	{
 		if (!requestSync)
 			requestSync = getRequest();
-		if (requestSync) {
-			if (window.netscape) {//Enable cross-domain request from local
-				try {
+
+		if (requestSync) 
+		{
+			if (window.netscape) 
+			{
+				//Enable cross-domain request from local
+				try 
+				{
 					netscape.security.PrivilegeManager.enablePrivilege("UniversalBrowserRead");
-				} catch (e) {
+				} 
+				catch (e) 
+				{
 					alert("Permission UniversalBrowserRead denied.");
 				}
 			}
-			requestSync.open("POST", url, false);
+			requestSync.open("POST", url, false);	//	同步
 			requestSync.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 			requestSync.send(params);
 			
-			if (requestSync && requestSync.readyState == 4) {
+			if (requestSync && requestSync.readyState == 4) 
+			{
 				return requestSync.responseText;
 			}
 		}
