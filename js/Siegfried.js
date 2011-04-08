@@ -274,12 +274,12 @@ function Timer(obj, func, args)
 	{
 		clearTimeout(timeout);
 		timeout = setTimeout(execute, millisec);
-		//postDebug("setTimeout "+ getClassName(obj) +"."+ getFunctionName(func) +" in "+ millisec +"ms", this);
+		postDebug("setTimeout " + getClassName(obj) + "." + getFunctionName(func) + " in " + millisec + "ms", this);
 	}
 	this.clearTimer = function() 
 	{
 		clearTimeout(timeout);
-		//postDebug("clearTimeout "+ getClassName(obj) +"."+ getFunctionName(func) +" in "+ millisec +"ms", this);
+		postDebug("clearTimeout " + getClassName(obj) + "." + getFunctionName(func) + " in " + millisec + "ms", this);
 	}
 }
 

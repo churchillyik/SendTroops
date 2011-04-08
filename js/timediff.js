@@ -52,17 +52,19 @@ EvaluateTimeDiff.Extends(BaseHttpAction,
 	},
 	response:	function(doc) 
 	{
-		if (doc.indexOf("<h1>出兵</h1>") < 0) 
+		if (doc.indexOf("<body class=\"v35 gecko a2b\">") < 0) 
 		{
 			postMessage("未打开 出兵 页面");
 			this.end(RETRY);
 			return;
 		}
-		var info = getStrBetween(doc, '<span id="tp1" class="b">', "</span>", 200);//<div id="ltime">用时 <b>16</b> ms<br>服务器时间: <span id="tp1" class="b">22:38:55</span> <span class="f6">(CST-15)</span></div>
+		//<div id="ltime">用时 <b>16</b> ms<br>服务器时间: <span id="tp1" class="b">22:38:55</span> <span class="f6">(CST-15)</span></div>
+		var info = getStrBetween(doc, '<span id="tp1" class="b">', "</span>", 200);
 		var estimateMS = this.arrayRequestTime[this.i].getTime() % 3600000;
-		var realMS = parseTime(info) * 1000 % 3600000 + 500;//We suppose that server floors millisecs instead of rounds them
+		//We suppose that server floors millisecs instead of rounds them
+		var realMS = parseTime(info) * 1000 % 3600000 + 500;
 		var diff = realMS - estimateMS;
-		if (diff >  1800000)
+		if (diff > 1800000)
 		{
 			diff -= 3600000;
 		}
@@ -81,14 +83,13 @@ EvaluateTimeDiff.Extends(BaseHttpAction,
 		this.i++;
 		this.loop();
 		return;//Next loop
-	}
-	,
+	},
 	result:	function() 
 	{
 		var array = this.arrayTimeDiff;
 		//var sum = 0;
 		var earliest = array[0];
-		for (var i=0; i<array.length; i++) 
+		for (var i = 0; i < array.length; i++) 
 		{
 			//sum += array[i];
 			if (array[i] < earliest)
@@ -193,7 +194,7 @@ TimeDiffManager.Extends(null,
 		{
 			caller = array[i];
 			var timer = new Timer(caller.callerObj, caller.callbackFunction, [this.timeDiff]);
-			timer.setTimer( (i+1)*interval );//a short delay between reponses to each caller
+			timer.setTimer((i+1) * interval);//a short delay between reponses to each caller
 		}
 		array.length = 0;
 	},

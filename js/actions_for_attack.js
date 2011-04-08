@@ -48,7 +48,7 @@ AttackAction.Extends(BaseHttpAction,
 			//property = "t1"
 			//<input type="text" class="text disabled" name="t1" value="" maxlength="6" />				
 			var info = startFromStr(doc, 'name="' + property + '"', 200);//t1 方阵
-			var iCount = parseDecimal(getStrBetween(info, ">(", ")<", null));
+			var iCount = parseDecimal(getStrBetween(info, "\">", "</a>", null));
 
 			var min;
 			var max;
@@ -64,14 +64,14 @@ AttackAction.Extends(BaseHttpAction,
 			}
 			else 
 			{
-				postError("部队类型 "+property+" 输入数量错误:"+troops[property]);
+				postError("部队类型 "+ property + " 输入数量错误:" + troops[property]);
 				this.end(ERROR);
 				return;
 			}
 			
 			if (iCount < min) 
 			{
-				postMessage("士兵不够,等待,现有 "+property+" "+iCount+"个");
+				postMessage("士兵不够,等待,现有 " + property + " " + iCount + "个");
 				this.end(NOT_READY);
 				return;
 			}
@@ -80,7 +80,7 @@ AttackAction.Extends(BaseHttpAction,
 			{
 				iCount = max;
 			}
-			param += property+"="+iCount+"&";//t1=100&
+			param += property + "=" + iCount + "&";//t1=100&
 		}
 
 		info = startFromStr(doc, 'name="timestamp"', 30);//t1 方阵
@@ -91,14 +91,14 @@ AttackAction.Extends(BaseHttpAction,
 
 		var coord = getCoordinate(this.target);
 		param += "b=1&";//hidden param
-		param += "timestamp=" + timestamp+"&";//hidden param
+		param += "timestamp=" + timestamp + "&";//hidden param
 		param += "timestamp_checksum=" + timestamp_checksum + "&";//hidden param
 		param += "c=" + this.type + "&";			//方式:3普通/侦察 4抢夺
 		param += "x=" + coord.x + "&";				//坐标x
 		param += "y=" + coord.y + "&";				//坐标y
 		param += "dname=";										//村庄名字
 
-		postMessage("出兵:　"+this.target);		//(-183|-164)
+		postMessage("出兵:　" + this.target);		//(-183|-164)
 
 		this.sendRequest("a2b.php", param, this.action2);
 	},
@@ -128,14 +128,17 @@ AttackAction.Extends(BaseHttpAction,
 		
 		if (doc.indexOf("初级玩家保护期") >= 0) 
 		{
-			postMessage("初级玩家保护期"+getStrBetween(doc, "初级玩家保护期", "</span>", null));//初级玩家保护期到 07/07/26 于 19:49:10</span>
+			//初级玩家保护期到 07/07/26 于 19:49:10</span>
+			postMessage("初级玩家保护期" + getStrBetween(doc, "初级玩家保护期", "</span>", null));
 			this.end(SUCCESS);
 			return;
 		}
 
-		if (doc.indexOf("("+this.target+")") < 0) 
+		var coord = getCoordinate(this.target);
+		if (doc.indexOf("<span class=\"xCoord\">(" + coord.x + "</span>") < 0 || doc.indexOf("<span class=\"yCoord\">" + coord.y + ")</span>") < 0) 
 		{
-			//(-183|-164)
+			//<span class="xCoord">(188</span>
+			//<span class="yCoord">65)</span>
 			postMessage("未打开 出兵确认 页面");
 			this.end(RETRY);
 			return;
@@ -147,18 +150,20 @@ AttackAction.Extends(BaseHttpAction,
 			this.end(SUCCESS);
 			return;
 		}
-
-		var sAttackDuration = getStrBetween(doc, "需时 ", " ", null);//需时 0:13:01 
+		
+		//<div class="in">in 0:40:00 hrs.</div>
+		var sAttackDuration = getStrBetween(doc, "<div class=\"in\">", "</div>", null);
+		sAttackDuration = getStrBetween(sAttackDuration, " ", " ", null);
 		this.iAttackDuration = parseTime(sAttackDuration);
 
 		var form = getStrBetween(doc, '<form method="post" action="a2b.php">', '</form>', 10000);
 		var param = "";
 
-		if (form.indexOf('<select name="kata"')  >= 0) 
+		if (form.indexOf('<select name="kata"') >= 0) 
 		{
 			//(准备以投石车攻击)
-			param += "kata=" +this.catapult1+"&";
-			param += "kata2="+this.catapult2+"&";
+			param += "kata=" + this.catapult1 + "&";
+			param += "kata2=" + this.catapult2 + "&";
 		}
 
 		for (var i = 0; i < 17; i++) 
@@ -192,10 +197,11 @@ AttackAction.Extends(BaseHttpAction,
 			param += "speed_artefact=" + value + "&"
 		}
 
-		var info = getStrBetween(doc, "<h1>", "</h1>", 10000);//<h1>对玩家鼎盛东辑事厂的侦察</h1> 的攻击 的抢夺
+		//<h1 class="titleInHeader">Reinforcement for 01</h1>
+		var info = getStrBetween(doc, "<h1 class=\"titleInHeader\">", "</h1>", 10000);
 		if (info.substr(0,3) == "对玩家") 
 		{
-			this.targetVillage = info.substr(3, info.length-6);//鼎盛东辑事厂
+			this.targetVillage = info.substr(3, info.length - 6);//鼎盛东辑事厂
 		} 
 		else if (info == "侦察绿洲") 
 		{
@@ -205,14 +211,14 @@ AttackAction.Extends(BaseHttpAction,
 		if (this.time == null) 
 		{
 			// for Attack Action
-			postMessage("确认 "+info+" 需时: "+sAttackDuration+" 小时 * 2");
+			postMessage("确认 " + info + " 需时: " + sAttackDuration + " 小时 * 2");
 			this.sendRequest("a2b.php", param, this.action3);
 			return;
 		} 
 		else 
 		{				
 			// for Precise Attack
-			postMessage(info+" 路程需时: "+sAttackDuration+" 小时");
+			postMessage(info + " 路程需时: " + sAttackDuration + " 小时");
 			var iTime  = parseTime(this.time.substr(0, 8)) + parseDecimal(this.time.substr(9, 1)) * 0.1;  //11:32:01.5
 			var iStart = iTime - this.iAttackDuration;
 			var nowStr = getTimeStr(new Date());
@@ -225,7 +231,7 @@ AttackAction.Extends(BaseHttpAction,
 			if (this.timeDiff == null || this.waiting > 300000) 
 			{
 				// > 5 mins
-				postMessage( "出兵前还需: "+ Math.floor(this.waiting/1000) +"秒" );
+				postMessage("出兵前还需: " + Math.floor(this.waiting/1000) + "秒");
 				this.end(NOT_READY);
 				return;
 			}
@@ -233,14 +239,14 @@ AttackAction.Extends(BaseHttpAction,
 			this.waiting -=  this.timeDiff;
 			var timer = new Timer(this, this.preciseAttack, [param]);
 			timer.setTimer(this.waiting);
-			postMessage( "倒计时: "+ this.waiting/1000 +"秒" );
+			postMessage("倒计时: " + this.waiting/1000 + "秒");
 			return;
 		}
 	},
 	
 	action3:	function(doc) 
 	{
-		if (doc.indexOf("集结点是村落士兵集合的地方") < 0) 
+		if (doc.indexOf("<div id=\"build\" class=\"gid16\">") < 0) 
 		{
 			postMessage("未打开 出兵成功 页面");
 			this.end(RETRY);
@@ -253,7 +259,7 @@ AttackAction.Extends(BaseHttpAction,
 	preciseAttack:	function(param) 
 	{
 		this.sendRequest("a2b.php", param, this.action3);
-		postMessage("压秒: "+this.time);
+		postMessage("压秒: "+ this.time);
 	}
 });
 //****** end of Class ******
@@ -299,7 +305,9 @@ AttackTimer.Extends(BaseWorkflow,
 			{
 				waiting = action.waiting - TimeDiffManager.EVAL_IN_ADVANCE;//提前准备 getTimeDiff()
 				if (waiting < 1000)
+				{
 					waiting = 1000;
+				}
 				var timer = new Timer(this, this.timeDiffStart, []);
 				timer.setTimer(waiting);
 				return;
@@ -327,7 +335,7 @@ AttackTimer.Extends(BaseWorkflow,
 	
 	timeDiffStart:	function() 
 	{
-		postDebug("target:"+this.target+" time:"+this.time+" - timeDiffStart", this);
+		postDebug("target:" + this.target + " time:" + this.time + " - timeDiffStart", this);
 		TimeDiffManager.instance.getTimeDiff(this, this.timeDiffResult);
 	},
 	
