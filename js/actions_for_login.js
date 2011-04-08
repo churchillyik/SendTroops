@@ -1,4 +1,5 @@
 ﻿// Class LoginAction
+// 登录操作	
 function LoginAction(villageId, username, password) 
 {
 	//Constructor, put Member Variables here.
@@ -12,11 +13,12 @@ function LoginAction(villageId, username, password)
 LoginAction.Extends(BaseHttpAction, 
 {
 	//Prototype, put Member Functions here.
-	start:	function() {
+	start:	function() 
+	{
 		postMessage("登录:"+ this.username);
 		this.sendRequest("login.php", null, this.loginAction1);
-	}
-	,
+	},
+	
 	loginAction1:	function(doc) 
 	{
 		var form = getStrBetween(doc, '<form method="post" name="snd" action="dorf1.php">', '</form>',2000);
@@ -55,24 +57,12 @@ LoginAction.Extends(BaseHttpAction,
 		
 		this.sendRequest("dorf1.php", param, this.loginAction2);
 	},
+	
 	loginAction2:	function(doc) 
 	{
-		if (doc.indexOf("密码错误") >= 0) 
+		if (doc.indexOf("<body class=\"v35 gecko login\">") >= 0) 
 		{
-			postError("密码错误");
-			this.end(ERROR);
-			return;
-		}
-		if (doc.indexOf("用户名不存在") >= 0) 
-		{
-			postError("用户名不存在");
-			this.end(ERROR);
-			return;
-		}
-		if (doc.indexOf("下次自动登入") >= 0) 
-		{
-			//登录失败
-			postError("登录失败");
+			postError("用户名不存在或密码错误");
 			this.end(ERROR);
 			return;
 		}
@@ -80,6 +70,63 @@ LoginAction.Extends(BaseHttpAction,
 		postMessage("登录成功");
 		this.end(SUCCESS);
 		return;
+	}
+});
+//****** end of Class ******
+
+//Class CheckLoginAction
+function CheckLoginAction(villageId, username, password) 
+{
+	//Constructor, put Member Variables here.
+	this.Super = BaseHttpAction;
+	this.Super(villageId);
+	
+	this.username = username;
+	this.password = password;
+}
+
+CheckLoginAction.Extends(BaseHttpAction, 
+{
+	//Prototype, put Member Functions here.
+	start:	function() 
+	{
+		postDebug("CheckLoginAction: "+ this.username, this);
+		this.sendRequest("dorf3.php", null, this.action1);
+	},
+	
+	action1:	function(doc) 
+	{
+		if (doc.indexOf("<body class=\"v35 gecko login\">") >= 0) 
+		{
+			//Goto LoginAction
+			var action = new LoginAction(null, this.username, this.password);
+			action.run(this, this.loginResult);
+			return;
+		}
+		if (doc.indexOf("dorf1.php?ok") >= 0) 
+		{
+			postError("服务器贴出公告，请先阅读确认，再来重新开始机器人");
+			this.end(ERROR);
+			return;
+		}
+
+		if (doc.indexOf("<body class=\"v35 gecko village3\">") >= 0) 
+		{
+			postMessage("Check Login 正常");
+			this.end(SUCCESS);
+			return;
+		} 
+		else 
+		{
+			postError("Check Login 未知错误");
+			this.end(ERROR);
+			return;
+		}
+	},
+	
+	loginResult:	function(action) 
+	{
+		this.end(action.status);//SUCCESS or ERROR
 	}
 });
 //****** end of Class ******

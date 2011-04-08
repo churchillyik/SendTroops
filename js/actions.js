@@ -65,8 +65,10 @@ BaseHttpAction.Extends(BaseWorkflow,
 			url += "newdid=" + this.villageId;
 		}
 		this.ajaxReq.send(this.serverURL + url, params, this, nextStep);
-		//if (params)
-		//	postDebug("params=" + params);
+		if (params)
+		{
+			postDebug("send to [" + this.serverURL + url + "] with params = [" + params + "]");
+		}
 	}
 });
 //****** end of Class ******

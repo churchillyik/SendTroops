@@ -30,11 +30,11 @@ AttackAction.Extends(BaseHttpAction,
 	{
 		postDebug("准备出兵", this);
 		this.sendRequest("a2b.php", null, this.action1);
-	}
-	,
+	},
+	
 	action1:	function(doc) 
 	{
-		if (doc.indexOf("<h1>出兵</h1>") < 0) 
+		if (doc.indexOf("<body class=\"v35 gecko a2b\">") < 0) 
 		{
 			postMessage("未打开 出兵 页面");
 			this.end(RETRY);
@@ -102,6 +102,7 @@ AttackAction.Extends(BaseHttpAction,
 
 		this.sendRequest("a2b.php", param, this.action2);
 	},
+	
 	action2:	function(doc) 
 	{
 		if (doc.indexOf("在这个坐标没有任何村庄") >= 0) 
@@ -236,6 +237,7 @@ AttackAction.Extends(BaseHttpAction,
 			return;
 		}
 	},
+	
 	action3:	function(doc) 
 	{
 		if (doc.indexOf("集结点是村落士兵集合的地方") < 0) 
@@ -247,6 +249,7 @@ AttackAction.Extends(BaseHttpAction,
 		this.end(SUCCESS);
 		return;
 	},
+	
 	preciseAttack:	function(param) 
 	{
 		this.sendRequest("a2b.php", param, this.action3);
@@ -256,6 +259,7 @@ AttackAction.Extends(BaseHttpAction,
 //****** end of Class ******
 
 // Class AttackTimer
+// 出兵任务Timer
 function AttackTimer(villageId, target, troops, type, time, catapult1, catapult2) 
 {
 	// Constructor, put Member Variables here.
@@ -280,6 +284,7 @@ AttackTimer.Extends(BaseWorkflow,
 		action.time = this.time;
 		action.run(this, this.attackResult);
 	},
+	
 	attackResult:	function(action) 
 	{
 		if (action.status == SUCCESS) 
@@ -319,11 +324,13 @@ AttackTimer.Extends(BaseWorkflow,
 			return;
 		}
 	},
+	
 	timeDiffStart:	function() 
 	{
 		postDebug("target:"+this.target+" time:"+this.time+" - timeDiffStart", this);
 		TimeDiffManager.instance.getTimeDiff(this, this.timeDiffResult);
 	},
+	
 	timeDiffResult:	function(timeDiff) 
 	{
 		postDebug("target:" + this.target + " time:" + this.time + " - timeDiffResult:" + timeDiff, this);
@@ -333,6 +340,7 @@ AttackTimer.Extends(BaseWorkflow,
 		action.timeDiff = timeDiff;
 		action.run(this, this.attackResult);
 	},
+	
 	checkloginResult:	function(action) 
 	{
 		if (action.status == SUCCESS) 

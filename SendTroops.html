@@ -5,7 +5,6 @@
 	<script type="text/javascript" language="JavaScript" src="js/Siegfried.js"></script>
 	<script type="text/javascript" language="JavaScript" src="js/actions.js"></script>
 	<script type="text/javascript" language="JavaScript" src="js/actions_for_login.js"></script>
-	<script type="text/javascript" language="JavaScript" src="js/actions_for_checklogin.js"></script>
 	<script type="text/javascript" language="JavaScript" src="js/timediff.js"></script>
 	<script type="text/javascript" language="JavaScript" src="js/actions_for_attack.js"></script>
 	<link rel="stylesheet" type="text/css" href="img/unx.css" />
@@ -20,7 +19,7 @@ var g_refreshTimeout;
 //	For debug usage Only				true or false
 var g_isDebug;
 if (getHtmlParam("debug").length > 0)
-	g_isDebug   = eval('(' + getHtmlParam("debug") + ')');
+	g_isDebug = eval('(' + getHtmlParam("debug") + ')');
 if (g_isDebug != true)
 	g_isDebug = false;	//default
 
