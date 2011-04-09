@@ -42,14 +42,16 @@ EvaluateTimeDiff.Extends(BaseHttpAction,
 		{
 			waiting += 1000;
 		}
-		//postMessage( getTimeStr(new Date(now.getTime() + waiting)) );
+		//postMessage(getTimeStr(new Date(now.getTime() + waiting)));
 		this.timer.setTimer(waiting);
 	},
+	
 	request:	function() 
 	{
 		this.arrayRequestTime[this.i] = new Date();
 		this.sendRequest("a2b.php", null, this.response);
 	},
+	
 	response:	function(doc) 
 	{
 		if (doc.indexOf("<body class=\"v35 gecko a2b\">") < 0) 
@@ -58,8 +60,10 @@ EvaluateTimeDiff.Extends(BaseHttpAction,
 			this.end(RETRY);
 			return;
 		}
-		//<div id="ltime">用时 <b>16</b> ms<br>服务器时间: <span id="tp1" class="b">22:38:55</span> <span class="f6">(CST-15)</span></div>
-		var info = getStrBetween(doc, '<span id="tp1" class="b">', "</span>", 200);
+		//<div class="content night" title="night">
+		//Server time:&nbsp;<span id="tp1">3:22:35</span>
+    //</div>
+		var info = getStrBetween(doc, '<span id="tp1">', "</span>", 200);
 		var estimateMS = this.arrayRequestTime[this.i].getTime() % 3600000;
 		//We suppose that server floors millisecs instead of rounds them
 		var realMS = parseTime(info) * 1000 % 3600000 + 500;
@@ -84,6 +88,7 @@ EvaluateTimeDiff.Extends(BaseHttpAction,
 		this.loop();
 		return;//Next loop
 	},
+	
 	result:	function() 
 	{
 		var array = this.arrayTimeDiff;
@@ -153,6 +158,7 @@ TimeDiffManager.Extends(null,
 			return;
 		}
 	},
+	
 	evaluateStart:	function() 
 	{
 		this.evalStartTime = new Date();
@@ -160,6 +166,7 @@ TimeDiffManager.Extends(null,
 		var action = new EvaluateTimeDiff(this.villageId);
 		action.run(this, this.evaluateResult);
 	},
+	
 	evaluateResult:	function(action) 
 	{
 		if (action.status == RETRY) 
@@ -198,6 +205,7 @@ TimeDiffManager.Extends(null,
 		}
 		array.length = 0;
 	},
+	
 	checkloginResult:	function(action) 
 	{
 		if (action.status == SUCCESS) 
