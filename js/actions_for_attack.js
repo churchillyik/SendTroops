@@ -97,7 +97,7 @@ AttackAction.Extends(BaseHttpAction,
 		param += "x=" + coord.x + "&";				//坐标x
 		param += "y=" + coord.y + "&";				//坐标y
 		param += "dname=";										//村庄名字
-
+		
 		postMessage("出兵:　" + this.target);		//(-183|-164)
 
 		this.sendRequest("a2b.php", param, this.action2);
@@ -135,10 +135,10 @@ AttackAction.Extends(BaseHttpAction,
 		}
 
 		var coord = getCoordinate(this.target);
-		if (doc.indexOf("<span class=\"xCoord\">(" + coord.x + "</span>") < 0 || doc.indexOf("<span class=\"yCoord\">" + coord.y + ")</span>") < 0) 
+		if (doc.indexOf("<span class=\"coordinateX\">(" + coord.x + "</span>") < 0 || doc.indexOf("<span class=\"coordinateY\">" + coord.y + ")</span>") < 0) 
 		{
-			//<span class="xCoord">(188</span>
-			//<span class="yCoord">65)</span>
+			//<span class="coordinateX">(188</span>
+			//<span class="coordinateY">65)</span>
 			postMessage("未打开 出兵确认 页面");
 			this.end(RETRY);
 			return;

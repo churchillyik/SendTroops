@@ -64,6 +64,7 @@ BaseHttpAction.Extends(BaseWorkflow,
 			url += (url.indexOf("?") > 0) ? "&" : "?";
 			url += "newdid=" + this.villageId;
 		}
+
 		this.ajaxReq.send(this.serverURL + url, params, this, nextStep);
 		if (params)
 		{
