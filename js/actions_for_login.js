@@ -60,9 +60,10 @@ LoginAction.Extends(BaseHttpAction,
 	
 	loginAction2:	function(doc) 
 	{
-		if (doc.indexOf("<body class=\"v35 gecko login\">") >= 0) 
+		var text = getStrBetween(doc, '<span class="error">', ' </span>', 50);
+		if (text.length > 0)
 		{
-			postError("用户名不存在或密码错误");
+			postError(text);
 			this.end(ERROR);
 			return;
 		}
@@ -96,7 +97,7 @@ CheckLoginAction.Extends(BaseHttpAction,
 	
 	action1:	function(doc) 
 	{
-		if (doc.indexOf("<body class=\"v35 gecko login\">") >= 0) 
+		if (doc.indexOf('<div id="content" class="login">') >= 0) 
 		{
 			//Goto LoginAction
 			var action = new LoginAction(null, this.username, this.password);
@@ -110,7 +111,7 @@ CheckLoginAction.Extends(BaseHttpAction,
 			return;
 		}
 
-		if (doc.indexOf("<body class=\"v35 gecko village3\">") >= 0) 
+		if (doc.indexOf('<div id="content" class="village3">') >= 0) 
 		{
 			postMessage("Check Login 正常");
 			this.end(SUCCESS);

@@ -297,14 +297,14 @@ function AjaxRequestText()
 	// 创建HTTP通讯对象
 	function getRequest()
 	{
-		var req = null;
+		var req = null;     
 		// Mozilla and Internet Explorer 7
 		if (window.XMLHttpRequest) 
 		{
 			req = new XMLHttpRequest();
 		}
 		// Microsoft IE before 7
-		if (window.ActiveXObject) 
+		else if (window.ActiveXObject) 
 		{
 			try { req = new ActiveXObject("Msxml2.XMLHTTP"); }
 			catch(e) 
@@ -322,6 +322,7 @@ function AjaxRequestText()
 		if (request && request.readyState == 4 && callbackFunc) 
 		{
 			var text = request.responseText;
+			postDebug(text.length, this);
 			callbackFunc.apply(callerObj, [text]);
 		}
 	}

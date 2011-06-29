@@ -54,7 +54,7 @@ EvaluateTimeDiff.Extends(BaseHttpAction,
 	
 	response:	function(doc) 
 	{
-		if (doc.indexOf("<body class=\"v35 gecko a2b\">") < 0) 
+		if (doc.indexOf('<div id="content" class="a2b">') < 0) 
 		{
 			postMessage("未打开 出兵 页面");
 			this.end(RETRY);
