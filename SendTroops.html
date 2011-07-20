@@ -90,7 +90,9 @@ function xstartBot()
         troops["t7"] = 1;
 				troopArray[6] = 1;
 			}
-
+			troops["t1"] 	= 20;
+			troopArray[0] = 20;
+			
 			var action = new AttackTimer(villageId, target, troops, type, time, catapult1, catapult2);
 			action.troopArray = troopArray;
 			g_taskList.push(action);	//Add this attack task into list
