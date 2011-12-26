@@ -21,7 +21,7 @@ LoginAction.Extends(BaseHttpAction,
 	
 	loginAction1:	function(doc) 
 	{
-		var form = getStrBetween(doc, '<form method="post" name="snd" action="dorf1.php">', '</form>',2000);
+		var form = getStrBetween(doc, '<form name="login" method="POST" action="dorf1.php">', '</form>',2000);
 		if (form.length == 0) 
 		{
 			postError("未打开 登录 页面");
