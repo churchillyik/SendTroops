@@ -49,14 +49,14 @@ EvaluateTimeDiff.Extends(BaseHttpAction,
 	request:	function() 
 	{
 		this.arrayRequestTime[this.i] = new Date();
-		this.sendRequest("a2b.php", null, this.response);
+		this.sendRequest("build.php?id=39&tt=2", null, this.response);
 	},
 	
 	response:	function(doc) 
 	{
-		if (doc.indexOf('<div id="content" class="a2b">') < 0) 
+		if (doc.indexOf('<div class="a2b">') < 0) 
 		{
-			postMessage("未打开 出兵 页面");
+			postMessage("未打开 出兵 页面aa");
 			this.end(RETRY);
 			return;
 		}

@@ -29,14 +29,14 @@ AttackAction.Extends(BaseHttpAction,
 	start:	function() 
 	{
 		postDebug("准备出兵", this);
-		this.sendRequest("a2b.php", null, this.action1);
+		this.sendRequest("build.php?id=39&tt=2", null, this.action1);
 	},
 	
 	action1:	function(doc) 
 	{
-		if (doc.indexOf('<div id="content" class="a2b">') < 0) 
+		if (doc.indexOf('<div class="a2b">') < 0) 
 		{
-			postMessage("未打开 出兵 页面");
+			postMessage("未打开 出兵 页面bb");
 			this.end(RETRY);
 			return;
 		}
@@ -100,7 +100,7 @@ AttackAction.Extends(BaseHttpAction,
 		
 		postMessage("出兵:　" + this.target);		//(-183|-164)
 
-		this.sendRequest("a2b.php", param, this.action2);
+		this.sendRequest("build.php?id=39&tt=2", param, this.action2);
 	},
 	
 	action2:	function(doc) 
@@ -156,7 +156,7 @@ AttackAction.Extends(BaseHttpAction,
 		sAttackDuration = getStrBetween(sAttackDuration, " ", " ", null);
 		this.iAttackDuration = parseTime(sAttackDuration);
 
-		var form = getStrBetween(doc, '<form method="post" action="a2b.php">', '</form>', 10000);
+		var form = getStrBetween(doc, '<form method="post" action="build.php?id=39&tt=2">', '</form>', 10000);
 		var param = "";
 
 		if (form.indexOf('<select name="kata"') >= 0) 
@@ -212,7 +212,7 @@ AttackAction.Extends(BaseHttpAction,
 		{
 			// for Attack Action
 			postMessage("确认 " + info + " 需时: " + sAttackDuration + " 小时 * 2");
-			this.sendRequest("a2b.php", param, this.action3);
+			this.sendRequest("build.php?id=39&tt=2", param, this.action3);
 			return;
 		} 
 		else 
@@ -258,7 +258,7 @@ AttackAction.Extends(BaseHttpAction,
 	
 	preciseAttack:	function(param) 
 	{
-		this.sendRequest("a2b.php", param, this.action3);
+		this.sendRequest("build.php?id=39&tt=2", param, this.action3);
 		postMessage("压秒: "+ this.time);
 	}
 });
