@@ -322,7 +322,6 @@ function AjaxRequestText()
 		if (request && request.readyState == 4 && callbackFunc) 
 		{
 			var text = request.responseText;
-			postDebug(text.length, this);
 			callbackFunc.apply(callerObj, [text]);
 		}
 	}

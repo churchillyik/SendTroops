@@ -166,7 +166,7 @@ AttackAction.Extends(BaseHttpAction,
 			param += "kata2=" + this.catapult2 + "&";
 		}
 
-		for (var i = 0; i < 17; i++) 
+		for (var i = 0; i < 20; i++) 
 		{
 			var input = getStrBetween(form, "<input", ">", 500);
 			var type = getStrBetween(input, 'type="', '"', null);
