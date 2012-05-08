@@ -157,7 +157,7 @@ AttackAction.Extends(BaseHttpAction,
 		sAttackDuration = getStrBetween(sAttackDuration, " ", " ", null);
 		this.iAttackDuration = parseTime(sAttackDuration);
 
-		var form = getStrBetween(doc, '<form method="post" action="build.php?id=39&tt=2">', '</form>', 10000);
+		var form = getStrBetween(doc, '<form method="post" action="build.php?id=39&amp;tt=2">', '</form>', 10000);
 		var param = "";
 
 		if (form.indexOf('<select name="kata"') >= 0) 
