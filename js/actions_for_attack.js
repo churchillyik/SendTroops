@@ -86,18 +86,19 @@ AttackAction.Extends(BaseHttpAction,
 		info = startFromStr(doc, 'name="timestamp"', 30);//t1 方阵
 		var timestamp = getStrBetween(info, 'value="', '" />', null);
 
-		info = startFromStr(doc, 'name="timestamp_checksum"', 20);//t1 方阵
+		info = startFromStr(doc, 'name="timestamp_checksum"', 100);//t1 方阵
 		var timestamp_checksum = getStrBetween(info, 'value="', '" />', null);
 
 		var coord = getCoordinate(this.target);
 		param += "b=1&";//hidden param
 		param += "timestamp=" + timestamp + "&";//hidden param
 		param += "timestamp_checksum=" + timestamp_checksum + "&";//hidden param
+		param += "currentDid=" + this.villageId + "&";
 		param += "c=" + this.type + "&";			//方式:3普通/侦察 4抢夺
 		param += "x=" + coord.x + "&";				//坐标x
 		param += "y=" + coord.y + "&";				//坐标y
 		param += "dname=";										//村庄名字
-		
+		//timestamp=1336459227&timestamp_checksum=951ebd&b=1&currentDid=42406&t1=&t4=&t7=&t9=&t2=&t5=100&t8=&t10=&t3=&t6=&t11=1&dname=&x=-13&y=9&c=2&s1=ok
 		postMessage("出兵:　" + this.target);		//(-183|-164)
 
 		this.sendRequest("build.php?id=39&tt=2", param, this.action2);
